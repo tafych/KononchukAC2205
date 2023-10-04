@@ -3,6 +3,7 @@
 #include<string>
 #include<cmath>
 #include <fstream>
+#include<sstream>
 using namespace std;
 void intCheck(int& intt, int min, int max)
 {
@@ -55,11 +56,121 @@ struct KS
 };
 vector<pipe> pipes;
 vector<KS> KSs;
+vector<int> HLP;
+vector<int> HLK;
+bool toDelP(pipe p){
+    return find(HLP.begin(), HLP.end(), stoi(p.Name)) != HLP.end();
+}
+bool toDelK(KS k) {
+    return find(HLK.begin(), HLK.end(), stoi(k.Name)) != HLK.end();
+}
+void highLightPinp() {
+    cout << "Which ones?" << endl;
+    string word;
+    int beg, end;
+    char s[255];
+    cin.getline(s, 255, '!');
+    stringstream ss(s);
+    while (ss >> word) {
+        if (word == "i") {
+            if (!(ss >> beg)) {
+                cout << "Input incorrect." << endl;
+                HLP.clear();
+                break;
+            };
+            if (!(ss >> end) or beg > end) {
+                cout << "Input incorrect." << endl;
+                HLP.clear();
+                break;
+            };
+            if (end > pipes.size()) {
+                cout << "Input incorrect." << endl;
+                HLP.clear();
+                break;
+            };
+            for (int i = beg;i < end + 1;i++) {
+                HLP.push_back(i);
+            };
+        }
+        else {
+            try {
+                if (stoi(word)>pipes.size()-1) {
+                    cout << "Input incorrect." << endl;
+                    HLP.clear();
+                    break;
+                }
+                else {
+                    HLP.push_back(stoi(word));
+                }
+            }
+            catch (...) {
+                cout << "Input incorrect." << endl;
+                HLP.clear();
+                break;
+            };
+        };
+    }
+}
+void highLightKinp() {
+    cout << "Which ones?" << endl;
+    string word;
+    int beg, end;
+    char s[255];
+    cin.getline(s, 255, '!');
+    stringstream ss(s);
+    while (ss >> word) {
+        if (word == "i") {
+            if (!(ss >> beg)) {
+                cout << "Input incorrect." << endl;
+                HLK.clear();
+                break;
+            };
+            if (!(ss >> end) or beg > end) {
+                cout << "Input incorrect." << endl;
+                HLK.clear();
+                break;
+            };
+            if (end > KSs.size()) {
+                cout << "Input incorrect." << endl;
+                HLK.clear();
+                break;
+            };
+            for (int i = beg;i < end + 1;i++) {
+                HLK.push_back(i);
+            };
+        }
+        else {
+            try {
+                if (stoi(word) > KSs.size() - 1) {
+                    cout << "Input incorrect." << endl;
+                    HLK.clear();
+                    break;
+                }
+                else {
+                    HLK.push_back(stoi(word));
+                }
+            }
+            catch (...) {
+                cout << "Input incorrect." << endl;
+                HLK.clear();
+                break;
+            };
+        };
+    }
+}
 //1
 void addPipe(vector<pipe>& vec, string n, float l, float d, bool m)
 {
     pipe newPipe{n,l,d,m};
     vec.push_back(newPipe);
+}
+void addPipes() {
+    cout << "How many: ";
+    int amo;
+    intCheck(amo, 0, 2147483647);
+    for (int i = 0;i < amo;i++) {
+        addPipe(pipes, to_string(pipes.size()), 0, 0, 0);
+    }
 }
 //2
 void addKS(vector<KS>& vec, string n, float am, float wm, float p)
@@ -67,9 +178,17 @@ void addKS(vector<KS>& vec, string n, float am, float wm, float p)
     KS newKS{n,am,wm,p};
     vec.push_back(newKS);
 }
+void addKSs() {
+    cout << "How many: ";
+    int amo;
+    intCheck(amo, 0, 2147483647);
+    for (int i = 0;i < amo;i++) {
+        addKS(KSs, to_string(KSs.size()), 0, 0, 0);
+    }
+}
 void menu()
 {
-    cout << "1 - add pipe\n" << "2 - add KS\n" << "3 - show all\n" << "4 - edit pipe\n" << "5 - edit KS\n" << "6 - save\n" << "7 - load\n" << "Input 0 or any non-integer to exit\n\nInput option:";
+    cout << "1 - add pipe\n" << "2 - add KS\n" << "3 - show all\n" << "4 - edit pipe\n" << "5 - edit KS\n" << "6 - save\n" << "7 - load\n" << "8 - highlite and delete pipes\n" << "9 - highlite and delete KSs\n" << "Input 0 or any non-integer to exit\n\nInput option:";
 }
 //3
 void oAll() {
@@ -84,27 +203,34 @@ void oAll() {
 }
 //4
 void rePipe() {
-    int i;
-    cout << "Pipe #: ";
-    intCheck(i, -1, pipes.size() - 1);
+    bool m;
+    float l, d;
     cout << "Length: ";
-    posFloatCheck(pipes[i].Length);
+    posFloatCheck(l);
     cout << "Diameter: ";
-    posFloatCheck(pipes[i].Diameter);
+    posFloatCheck(d);
     cout << "Under Maintenance: ";
-    boolCheck(pipes[i].InMaintenance);
+    boolCheck(m);
+    for (int i=0;i < HLP.size();i++) {
+        pipes[HLP[i]].Length = l;
+        pipes[HLP[i]].Diameter = d;
+        pipes[HLP[i]].InMaintenance = m;
+    };
 }
 //5
 void reKS() {
-    int i;
-    cout << "KS #: ";
-    intCheck(i, -1, KSs.size() - 1);
+    float am,wm,p;
     cout << "All Machines: ";
-    intCheck(KSs[i].AllMachines, -1, 20);
+    posFloatCheck(am);
     cout << "Working Machines: ";
-    intCheck(KSs[i].WorkingMachines, -1, KSs[i].AllMachines);
+    posFloatCheck(wm);
     cout << "Machine Productivity: ";
-    floatCheck(KSs[i].Productivity);
+    floatCheck(p);
+    for (int i = 0;i < HLK.size();i++) {
+        KSs[HLK[i]].AllMachines = am;
+        KSs[HLK[i]].WorkingMachines = wm;
+        KSs[HLK[i]].Productivity = p;
+    };
 }
 //6
 void sAll() {
@@ -147,8 +273,10 @@ void lAll() {
     }
 }
 int main()
+//8
+//9
 {
-    int option = 10;
+    int option = 15;
     while (option != 0) {
         cout << "-----~~~~===#(0)#===~~~~-----\n";
         menu();
@@ -157,41 +285,63 @@ int main()
             //1 - Добавить пустую трубу 
         case 1:
         {
-            addPipe(pipes, to_string(pipes.size()), 0, 0, 0);}
+            addPipes();
+        }
         break;
         //2 - Добавить пустую КС
         case 2:
         {
-            addKS(KSs, to_string(KSs.size()), 0, 0, 0);}
-              break;
-              //3 - Вывести все элементы
+            addKSs();
+        }
+        break;
+        //3 - Вывести все элементы
         case 3:
         {
             oAll();
         }
-              break;
-              //4 - Редактировать трубу
+        break;
+        //4 - Редактировать трубу
         case 4:
         {
+            highLightPinp();
             rePipe();
         }
-              break;
-              //5 - Редактировать КС
-        case 5: 
+        break;
+        //5 - Редактировать КС
+        case 5:
         {
+            highLightKinp();
             reKS();
         }
-              break;
-              //6 - Сохранить всё
+        break;
+        //6 - Сохранить всё
         case 6:
         {
             sAll();}
-              break;
-              //7 - Загрузить
+        break;
+        //7 - Загрузить
         case 7:
         {
             lAll();}
-              break;
+        break;
+        case 8:
+        {
+            HLP.clear();
+            highLightPinp();
+            vector<pipe>::iterator it;
+            it = remove_if(pipes.begin(), pipes.end(), toDelP);
+            pipes.erase(it, pipes.end());
+        }
+        break;
+        case 9:
+        {
+            HLK.clear();
+            highLightKinp();
+            vector<KS>::iterator it;
+            it = remove_if(KSs.begin(), KSs.end(), toDelK);
+            KSs.erase(it, KSs.end());
+        }
+        break;
         }
     }
 }
