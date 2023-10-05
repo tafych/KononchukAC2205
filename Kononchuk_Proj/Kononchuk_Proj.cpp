@@ -4,6 +4,7 @@
 #include<cmath>
 #include <fstream>
 #include<sstream>
+#include<algorithm>
 using namespace std;
 void intCheck(int& intt, int min, int max)
 {
@@ -65,6 +66,7 @@ bool toDelK(KS k) {
     return find(HLK.begin(), HLK.end(), stoi(k.Name)) != HLK.end();
 }
 void highLightPinp() {
+    HLP.clear();
     cout << "Which ones?" << endl;
     string word;
     int beg, end;
@@ -110,8 +112,12 @@ void highLightPinp() {
             };
         };
     }
+    sort(HLP.begin(), HLP.end());
+    auto last = unique(HLP.begin(), HLP.end());
+    HLP.erase(last, HLP.end());
 }
 void highLightKinp() {
+    HLK.clear();
     cout << "Which ones?" << endl;
     string word;
     int beg, end;
@@ -157,6 +163,13 @@ void highLightKinp() {
             };
         };
     }
+    sort(HLK.begin(), HLK.end());
+    auto last = unique(HLK.begin(), HLK.end());
+    HLK.erase(last, HLK.end());
+}
+void menu()
+{
+    cout << "1 - add pipe\n" << "2 - add KS\n" << "3 - show highlited\n" << "4 - highlight pipes\n" << "5 - highlite KSs\n" << "6 - edit highlited pipes\n" << "7 - edit highlited KSs\n" << "8 - delete highlited pipes\n" << "9 - delete highlited KSs\n" << "Input 0 or any non-integer to exit\n\nInput option:";
 }
 //1
 void addPipe(vector<pipe>& vec, string n, float l, float d, bool m)
@@ -169,7 +182,7 @@ void addPipes() {
     int amo;
     intCheck(amo, 0, 2147483647);
     for (int i = 0;i < amo;i++) {
-        addPipe(pipes, to_string(pipes.size()), 0, 0, 0);
+        addPipe(pipes, to_string(pipes.size()), 10, 10, 0);
     }
 }
 //2
@@ -183,25 +196,92 @@ void addKSs() {
     int amo;
     intCheck(amo, 0, 2147483647);
     for (int i = 0;i < amo;i++) {
-        addKS(KSs, to_string(KSs.size()), 0, 0, 0);
+        addKS(KSs, to_string(KSs.size()), 10, 10, 10);
     }
-}
-void menu()
-{
-    cout << "1 - add pipe\n" << "2 - add KS\n" << "3 - show all\n" << "4 - edit pipe\n" << "5 - edit KS\n" << "6 - save\n" << "7 - load\n" << "8 - highlite and delete pipes\n" << "9 - highlite and delete KSs\n" << "Input 0 or any non-integer to exit\n\nInput option:";
 }
 //3
 void oAll() {
-    cout << "All Pipes:\n";
-    for (int i = 0; i < pipes.size(); i++) {
-        cout << "Name: " << pipes[i].Name << "; Length: " << pipes[i].Length << "; Diameter: " << pipes[i].Diameter << "; Under Maintenace: " << pipes[i].InMaintenance << endl;
+    cout << "Pipes:\n";
+    for (int i = 0; i < HLP.size(); i++) {
+        cout << "Name: " << pipes[HLP[i]].Name << "; Length: " << pipes[HLP[i]].Length << "; Diameter: " << pipes[HLP[i]].Diameter << "; Under Maintenace: " << pipes[HLP[i]].InMaintenance << endl;
     };
-    cout << "All KSs:\n";
-    for (int i = 0; i < KSs.size(); i++) {
-        cout << "Name: " << KSs[i].Name << "; All Machines: " << KSs[i].AllMachines << "; Working Machines: " << KSs[i].WorkingMachines << "; Machine Productivity: " << KSs[i].Productivity << "; KS Efficiency:" << KSs[i].Efficiency() << endl;
+    cout << "KSs:\n";
+    for (int i = 0; i < HLK.size(); i++) {
+        cout << "Name: " << KSs[HLK[i]].Name << "; All Machines: " << KSs[HLK[i]].AllMachines << "; Working Machines: " << KSs[HLK[i]].WorkingMachines << "; Machine Productivity: " << KSs[HLK[i]].Productivity << "; KS Efficiency:" << KSs[HLK[i]].Efficiency() << endl;
     };
 }
 //4
+void HLPipes() {
+    HLP.clear();
+    int opti;
+    cout << "1 - all pipes\n2 - choose by name\n3 - choose by maintenance\n";
+    intCheck(opti, 1, 3);
+    switch (opti) {
+    case 1:
+    {
+        for (int i = 0;i < pipes.size();i++) {
+            HLP.push_back(i);
+        }
+    }
+    break;
+    case 2:
+    {
+        highLightPinp();
+    }
+    break;
+    case 3:
+    {
+        cout << "In Maintenance?\n";
+        bool im;
+        boolCheck(im);
+        for (int i = 0;i < pipes.size();i++) {
+            if (pipes[i].InMaintenance == im) {
+                HLP.push_back(i);
+            }
+        }
+    }
+    break;
+    }
+}
+//5
+void HLKSs() {
+    HLK.clear();
+    int opti;
+    cout << "1 - all KSs\n2 - choose by name\n3 - choose by % of machines working\n";
+    intCheck(opti, 1, 3);
+    switch (opti) {
+    case 1:
+    {
+        for (int i = 0;i < KSs.size();i++) {
+            HLK.push_back(i);
+        }
+    }
+    break;
+    case 2:
+    {
+        highLightKinp();
+    }
+    break;
+    case 3:
+    {
+        cout << "% of machines working (higher or equal): \n";
+        float pom;
+        posFloatCheck(pom);
+        if (pom < 0 or pom>100) {
+            posFloatCheck(pom);
+        }
+        for (int i = 0;i < KSs.size();i++) {
+            float del = (KSs[i].WorkingMachines / KSs[i].AllMachines) * 100;
+            if (del >= pom) {
+                HLK.push_back(i);
+            }
+        }
+    }
+    break;
+    }
+}
+//6
+
 void rePipe() {
     bool m;
     float l, d;
@@ -211,15 +291,15 @@ void rePipe() {
     posFloatCheck(d);
     cout << "Under Maintenance: ";
     boolCheck(m);
-    for (int i=0;i < HLP.size();i++) {
+    for (int i = 0;i < HLP.size();i++) {
         pipes[HLP[i]].Length = l;
         pipes[HLP[i]].Diameter = d;
         pipes[HLP[i]].InMaintenance = m;
     };
 }
-//5
+//7
 void reKS() {
-    float am,wm,p;
+    float am, wm, p;
     cout << "All Machines: ";
     posFloatCheck(am);
     cout << "Working Machines: ";
@@ -232,7 +312,27 @@ void reKS() {
         KSs[HLK[i]].Productivity = p;
     };
 }
-//6
+//8
+void delHLP() {
+    vector<pipe>::iterator it;
+    it = remove_if(pipes.begin(), pipes.end(), toDelP);
+    pipes.erase(it, pipes.end());
+    for (int i = 0;i < pipes.size();i++) {
+        pipes[i].Name = to_string(i);
+    }
+    HLP.clear();
+}
+//9
+void delHLK() {
+    vector<KS>::iterator it;
+    it = remove_if(KSs.begin(), KSs.end(), toDelK);
+    KSs.erase(it, KSs.end());
+    for (int i = 0;i < KSs.size();i++) {
+        KSs[i].Name = to_string(i);
+    }
+    HLK.clear();
+}
+//10
 void sAll() {
     cout << "Input File Name (with .txt extension): ";
     string fname;
@@ -248,7 +348,7 @@ void sAll() {
     }
     saveFile.close();
 }
-//7
+//11
 void lAll() {
     string fname;
     pipes.clear();
@@ -294,54 +394,60 @@ int main()
             addKSs();
         }
         break;
-        //3 - Вывести все элементы
+        //3 - Вывести выделенные элементы
         case 3:
         {
             oAll();
         }
         break;
-        //4 - Редактировать трубу
+        //4 - Выделить нужные трубы
         case 4:
         {
-            highLightPinp();
-            rePipe();
+            HLPipes();
         }
         break;
-        //5 - Редактировать КС
+        //5 - Выделить нужные КС
         case 5:
         {
-            highLightKinp();
-            reKS();
+            HLKSs();
         }
         break;
-        //6 - Сохранить всё
+        //6 - Редактировать выделенные трубы
         case 6:
         {
-            sAll();}
+            rePipe();
+            ;}
         break;
-        //7 - Загрузить
+        //7 - Редактировать выделенные КС
         case 7:
         {
-            lAll();}
+            reKS();
+            ;}
         break;
+        //8 - удалить выделенные трубы
         case 8:
         {
-            HLP.clear();
-            highLightPinp();
-            vector<pipe>::iterator it;
-            it = remove_if(pipes.begin(), pipes.end(), toDelP);
-            pipes.erase(it, pipes.end());
+            delHLP();
         }
         break;
+        //9 - удалить выделенные КС
         case 9:
         {
-            HLK.clear();
-            highLightKinp();
-            vector<KS>::iterator it;
-            it = remove_if(KSs.begin(), KSs.end(), toDelK);
-            KSs.erase(it, KSs.end());
+            delHLK();
         }
         break;
+        //10 - сохранить всё
+        case 10:
+        {
+            sAll();
+        }
+            break;
+        //11 - загрузить всё
+        case 11:
+        {
+            lAll();
+        }
+            break;
         }
     }
 }
