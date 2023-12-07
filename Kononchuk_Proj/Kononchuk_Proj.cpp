@@ -6,6 +6,7 @@
 #include<sstream>
 #include<algorithm>
 #include<cstdio>
+#include<map>
 
 using namespace std;
 void slog() {}
@@ -264,7 +265,14 @@ void addSpecialKS(vector<KS>& KSs) {
     addKS(KSs, to_string(KSs.size()), am, wm, p);
     elog();
 }
-
+/*
+void connectKSs(vector<KS>& KSs, vector<node>& nodes, int n1, int n2) {
+    if (find(nodes.begin(), nodes.end(), n1) == nodes.end()) {
+        nodes.push_back(n1);
+    }
+    //  find(vec.begin(), vec.end(), item) != vec.end()
+}
+*/
 //3
 void oAll(vector<pipe>& pipes, vector<KS>& KSs, vector<int>& HLP, vector<int>& HLK) {
     slog();
@@ -461,6 +469,21 @@ void lAll(vector<pipe>& pipes, vector<KS>& KSs) {
     }
     elog();
 }
+
+void createCons(vector<vector<int>>& cons, vector<KS>& KSs) {
+    vector<int> dd;
+    for (int i = 0;i < KSs.size(); i++) {
+        dd.push_back(0);
+    }
+    for (int i = 0;i < KSs.size(); i++) {
+        cons.push_back(dd);
+    }
+}
+
+void connect(vector<vector<int>>& cons, int oKS, int iKS, int pipe) {
+
+}
+
 int main()
 {
     freopen("log.txt", "w", stderr);
@@ -468,22 +491,23 @@ int main()
     vector<KS> KSs;
     vector<int> HLP;
     vector<int> HLK;
+    vector<vector<int>> connections;
     int option = 15;
     while (option != 0) {
         cout << "-----~~~~===#(0)#===~~~~-----\n";
         menu();
-        intCheck(option,0,11);
+        intCheck(option,0,14);
 
         switch (option) {
         case 0:
         {
-            cout << "Are you sure you want to exit? Not saved data will be lost" << endl << "Y - Yes, anything else - No"<<endl;
+            cout << "Are you sure you want to exit? Not saved data will be lost" << endl << "Y - Yes, anything else - No" << endl;
             string ans = "";
             cin >> ans;
             if (ans != "Y") { option = 15; };
         }
         break;
-            //1 - Добавить пустую трубу 
+        //1 - Добавить пустую трубу 
         case 1:
         {
             addPipes(pipes);
@@ -510,7 +534,7 @@ int main()
         //3 - Вывести выделенные элементы
         case 5:
         {
-            oAll(pipes,KSs,HLP,HLK);
+            oAll(pipes, KSs, HLP, HLK);
         }
         break;
         //4 - Выделить нужные трубы
@@ -522,37 +546,37 @@ int main()
         //5 - Выделить нужные КС
         case 7:
         {
-            HLKSs(KSs,HLK);
+            HLKSs(KSs, HLK);
         }
         break;
         //6 - Редактировать выделенные трубы
         case 8:
         {
-            rePipe(pipes,HLP);
+            rePipe(pipes, HLP);
             ;}
         break;
         //7 - Редактировать выделенные КС
         case 9:
         {
-            reKS(KSs,HLK);
+            reKS(KSs, HLK);
             ;}
         break;
         //8 - удалить выделенные трубы
         case 10:
         {
-            delHLP(pipes,HLP);
+            delHLP(pipes, HLP);
         }
         break;
         //9 - удалить выделенные КС
         case 11:
         {
-            delHLK(KSs,HLK);
+            delHLK(KSs, HLK);
         }
         break;
         //10 - сохранить всё
         case 12:
         {
-            sAll(pipes,KSs);
+            sAll(pipes, KSs);
         }
         break;
         //11 - загрузить всё
@@ -561,6 +585,9 @@ int main()
             lAll(pipes, KSs);
         }
         break;
+
+        case 14:
+            createCons(connections, KSs);
         }
     }
 }
