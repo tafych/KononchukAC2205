@@ -65,16 +65,21 @@ struct pipe
     float Diameter;
     bool InMaintenance;
 };
+void outPipe(pipe pipe) {
+    cout << "Name: " << pipe.Name << "; Length: " << pipe.Length << "; Diameter: " << pipe.Diameter << "; Under Maintenace: " << pipe.InMaintenance << endl;
+
+}
 struct KS
 {
     string Name;
     int AllMachines;
     int WorkingMachines;
     float Productivity;
-    float Efficiency() {
-        return pow(WorkingMachines * Productivity, 0.66);
-    }
 };
+void outKS(KS KS) {
+    cout << "Name: " << KS.Name << "; All Machines: " << KS.AllMachines << "; Working Machines: " << KS.WorkingMachines << "; Machine Productivity: " << KS.Productivity << endl;
+
+}
 //bool toDelP(vector<int>& HLP, pipe p) {
 //    return find(HLP.begin(), HLP.end(), stoi(p.Name)) != HLP.end();
 //}
@@ -200,14 +205,38 @@ void menu()
         <<"8 - edit highlited pipes\n"
         << "9 - edit highlited KSs\n"
         << "10- delete highlited pipes\n" 
-        << "11 - delete highlited KSs\n" 
+        << "11 - delete highlited KSs\n"
+        << "12 - save all\n"
+        << "13 - load all\n"
         << "Input 0 to exit\n\nInput option:";
     elog();
 }
 //1
+int findPipeByName(vector<pipe>& pipes, string name) {
+    for (int j = 0;j < pipes.size();j++) {
+        if (pipes[j].Name == name) {
+            return j;
+            break;
+        }
+    }
+    return -1;
+}
+int findKSByName(vector<KS>& KSs, string name) {
+    int i = -1;
+    for (int j = 0;j < KSs.size();j++) {
+        if (KSs[j].Name == name) {
+            int i = j;
+            break;
+        }
+    }
+    return i;
+}
 void addPipe(vector<pipe>& vec, string n, float l, float d, bool m)
 {
     slog();
+    if (findPipeByName(vec, n) != -1) {
+        cout << "A pipe with the name '" << n << "' already exists. Addition failed" << endl;
+    }
     pipe newPipe{ n,l,d,m };
     vec.push_back(newPipe);
     elog();
@@ -224,21 +253,27 @@ void addPipes(vector<pipe>& pipes) {
 }
 void addSpecialPipe(vector<pipe>& pipes) {
     slog();
+    string name;
     float l, d;
     bool m;
+    cout << "Name: " << endl;
+    cin >> name;
     cout << "Length: " << endl;
     posFloatCheck(l);
     cout << "Diameter: " << endl;
     posFloatCheck(d);
     cout << "In maintenance: " << endl;
     boolCheck(m);
-    addPipe(pipes, to_string(pipes.size()), l, d, m);
+    addPipe(pipes, name, l, d, m);
     elog();
 }
 //2
 void addKS(vector<KS>& vec, string n, float am, float wm, float p)
 {
     slog();
+    if (findKSByName(vec, n) != -1) {
+        cout << "A KS with the name '" << n << "' already exists. Addition failed" << endl;
+    }
     KS newKS{ n,am,wm,p };
     vec.push_back(newKS);
     elog();
@@ -255,14 +290,17 @@ void addKSs(vector<KS>& KSs) {
 }
 void addSpecialKS(vector<KS>& KSs) {
     slog();
+    string name;
     float am, wm,p;
+    cout << "Name: " << endl;
+    cin >> name;
     cout << "All machines: " << endl;
     posFloatCheck(am);
     cout << "Working machines: " << endl;
     posFloatCheck(wm);
     cout << "Productivity: " << endl;
     posFloatCheck(p);
-    addKS(KSs, to_string(KSs.size()), am, wm, p);
+    addKS(KSs, name, am, wm, p);
     elog();
 }
 /*
@@ -278,20 +316,23 @@ void oAll(vector<pipe>& pipes, vector<KS>& KSs, vector<int>& HLP, vector<int>& H
     slog();
     cout << "Pipes:\n";
     for (int i = 0; i < HLP.size(); i++) {
-        cout << "Name: " << pipes[HLP[i]].Name << "; Length: " << pipes[HLP[i]].Length << "; Diameter: " << pipes[HLP[i]].Diameter << "; Under Maintenace: " << pipes[HLP[i]].InMaintenance << endl;
+        cout << "id: " << i << " ;";
+        outPipe(pipes[i]);
     };
     cout << "KSs:\n";
     for (int i = 0; i < HLK.size(); i++) {
-        cout << "Name: " << KSs[HLK[i]].Name << "; All Machines: " << KSs[HLK[i]].AllMachines << "; Working Machines: " << KSs[HLK[i]].WorkingMachines << "; Machine Productivity: " << KSs[HLK[i]].Productivity << "; KS Efficiency:" << KSs[HLK[i]].Efficiency() << endl;
+        cout << "id: " << i << " ;";
+        outKS(KSs[i]);
     };
     elog();
 }
 //4
+
 void HLPipes(vector<pipe> pipes,vector<int>& HLP) {
     slog();
     HLP.clear();
     int opti;
-    cout << "1 - all pipes\n2 - choose by name\n3 - choose by maintenance\n";
+    cout << "1 - all pipes\n2 - choose by id\n3 - choose by name\n4 - choose by maintenance\n";
     intCheck(opti, 1, 3);
     switch (opti) {
     case 1:
@@ -308,6 +349,20 @@ void HLPipes(vector<pipe> pipes,vector<int>& HLP) {
     break;
     case 3:
     {
+        cout << "Input name: " << endl;
+        string name;
+        cin >> name;
+        int ind = findPipeByName(pipes, name);
+        if (ind == -1) {
+            cout << "No pipe with such name\n";
+        }
+        else {
+            HLP.push_back(ind);
+        }
+    }
+    break;
+    case 4:
+    {
         cout << "In Maintenance?\n";
         bool im;
         boolCheck(im);
@@ -322,11 +377,12 @@ void HLPipes(vector<pipe> pipes,vector<int>& HLP) {
     elog();
 }
 //5
+
 void HLKSs(vector<KS> KSs,vector<int>& HLK) {
     slog();
     HLK.clear();
     int opti;
-    cout << "1 - all KSs\n2 - choose by name\n3 - choose by % of machines working\n";
+    cout << "1 - all KSs\n2 - choose by id\n3 - choose by name\n4 - choose by % of machines working\n";
     intCheck(opti, 1, 3);
     switch (opti) {
     case 1:
@@ -343,10 +399,26 @@ void HLKSs(vector<KS> KSs,vector<int>& HLK) {
     break;
     case 3:
     {
+        cout << "Input name: " << endl;
+        string name;
+        cin >> name;
+        int ind = findKSByName(KSs, name);
+        if (ind == -1) {
+            cout << "No KS with such name\n";
+        }
+        else {
+            HLK.push_back(ind);
+            break;
+        }
+    }
+    break;
+    case 4:
+    {
         cout << "% of machines working (higher or equal): \n";
         float pom;
         posFloatCheck(pom);
         if (pom < 0 or pom>100) {
+            cout << "Неподходящее число\n" << endl;
             posFloatCheck(pom);
         }
         for (int i = 0;i < KSs.size();i++) {
@@ -390,11 +462,21 @@ void reKS(vector<KS>& KSs, vector<int>& HLK) {
     posFloatCheck(wm);
     //cout << "Machine Productivity: ";
     //floatCheck(p);
+    bool overload = false;
     for (int i = 0;i < HLK.size();i++) {
         //KSs[HLK[i]].AllMachines = am;
-        KSs[HLK[i]].WorkingMachines = wm;
+        if (wm > KSs[HLK[i]].AllMachines) {
+            KSs[HLK[i]].WorkingMachines = KSs[HLK[i]].AllMachines;
+            overload = true;
+        }
+        else {
+            KSs[HLK[i]].WorkingMachines = wm;
+        }
         //KSs[HLK[i]].Productivity = p;
     };
+    if (overload) {
+        cout << "!!! Attempt(s) to set amount of working machines to more than the total of machines. Working machines set to maximal amount for each KS affected" << endl;
+    }
     elog();
 }
 //8
@@ -405,9 +487,6 @@ void delHLP(vector<pipe>& pipes, vector<int>& HLP) {
         return find(HLP.begin(), HLP.end(), stoi(p.Name)) != HLP.end();
         });
     pipes.erase(it, pipes.end());
-    for (int i = 0;i < pipes.size();i++) {
-        pipes[i].Name = to_string(i);
-    }
     HLP.clear();
     elog();
 }
@@ -419,9 +498,6 @@ void delHLK(vector<KS>& KSs, vector<int>& HLK) {
         return find(HLK.begin(), HLK.end(), stoi(k.Name)) != HLK.end();
         });
     KSs.erase(it, KSs.end());
-    for (int i = 0;i < KSs.size();i++) {
-        KSs[i].Name = to_string(i);
-    }
     HLK.clear();
     elog();
 }
@@ -446,27 +522,33 @@ void sAll(vector<pipe>& pipes, vector<KS>& KSs) {
 //11
 void lAll(vector<pipe>& pipes, vector<KS>& KSs) {
     slog();
-    string fname;
-    pipes.clear();
-    KSs.clear();
-    cout << "Input File Name (with .txt extension): ";
-    cin >> fname;
-    ifstream loadFile(fname);
-    int amo;
-    vector<string> nums;
-    loadFile >> amo;
-    string n;
-    float f1, f2, f3;
-    bool b;
-    for (int i = 0;i < amo;i++) {
-        loadFile >> n >> f1 >> f2 >> b;
-        addPipe(pipes, n, f1, f2, b);
-    }
-    loadFile >> amo;
-    for (int i = 0;i < amo;i++) {
-        loadFile >> n >> f1 >> f2 >> f3;
-        addKS(KSs, n, f1, f2, f3);
-    }
+    cout << "Loading data from a file will delete any current not saved data. Proceed?" << endl << "Y - Yes, anything else - No" << endl;
+    string ans = "";
+    cin >> ans;
+    if (ans == "Y") {
+        string fname;
+        pipes.clear();
+        KSs.clear();
+        cout << "Input File Name (with .txt extension): ";
+        cin >> fname;
+        ifstream loadFile(fname);
+        int amo;
+        vector<string> nums;
+        loadFile >> amo;
+        string n;
+        float f1, f2, f3;
+        bool b;
+        for (int i = 0;i < amo;i++) {
+            loadFile >> n >> f1 >> f2 >> b;
+            addPipe(pipes, n, f1, f2, b);
+        }
+        loadFile >> amo;
+        for (int i = 0;i < amo;i++) {
+            loadFile >> n >> f1 >> f2 >> f3;
+            addKS(KSs, n, f1, f2, f3);
+        }
+    };
+    
     elog();
 }
 
@@ -479,11 +561,19 @@ void createCons(vector<vector<int>>& cons, vector<KS>& KSs) {
         cons.push_back(dd);
     }
 }
-
-void connect(vector<vector<int>>& cons, int oKS, int iKS, int pipe) {
-
+//void updateCons(vector<vector<int>> cons,)
+/*void connect(vector<vector<int>>& cons, int oKS, int iKS, int pipe) {
+    cons[oKS][iKS] = pipe;
+}*/
+void showCons(vector<vector<int>> cons) {
+    for (int i = 0;i < cons.size();i++) {
+        string dop="";
+        for (int j = 0;j < cons[0].size();j++) {
+            dop += to_string(cons[i][j]) + " ";
+        }
+        cout << dop << endl;
+    }
 }
-
 int main()
 {
     freopen("log.txt", "w", stderr);
@@ -492,11 +582,11 @@ int main()
     vector<int> HLP;
     vector<int> HLK;
     vector<vector<int>> connections;
-    int option = 15;
+    int option = 20;
     while (option != 0) {
         cout << "-----~~~~===#(0)#===~~~~-----\n";
         menu();
-        intCheck(option,0,14);
+        intCheck(option,0,15);
 
         switch (option) {
         case 0:
@@ -504,7 +594,7 @@ int main()
             cout << "Are you sure you want to exit? Not saved data will be lost" << endl << "Y - Yes, anything else - No" << endl;
             string ans = "";
             cin >> ans;
-            if (ans != "Y") { option = 15; };
+            if (ans != "Y") { option = 20; };
         }
         break;
         //1 - Добавить пустую трубу 
@@ -585,9 +675,13 @@ int main()
             lAll(pipes, KSs);
         }
         break;
-
-        case 14:
+        /*case 14:
             createCons(connections, KSs);
+            connect(connections, 0,1,1);
+            break;
+        case 15:
+            showCons(connections);
+            break;*/
         }
     }
 }
